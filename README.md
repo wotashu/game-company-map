@@ -1,2 +1,2 @@
-# game-company-map
+# Washington Game company Map
 Leaflet Map of Game Companies in Washington State
