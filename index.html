@@ -1,1 +1,240 @@
-My Page
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0" />
+    <title>Interactive Map of Video Game Makers</title>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7/leaflet.css" />
+    <link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.4/mapbox.css' rel='stylesheet' />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="src/MarkerCluster.css" />
+    <link rel="stylesheet" href="src/MarkerCluster.Default.css" />
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox.js/v1.6.4/mapbox.js'></script>
+    <script src="src/leaflet.markercluster-src.js"></script>
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style type="text/css">
+    #map {
+        height: 800px;
+    }
+    
+    .marker-cluster-small {
+        background-color: rgba(153, 216, 201, 0.8);
+    }
+    
+    .marker-cluster-small div {
+        background-color: rgba(153, 216, 201, 0.8);
+    }
+    
+    .marker-cluster-medium {
+        background-color: rgba(49, 163, 84, 0.8);
+    }
+    
+    .marker-cluster-medium div {
+        background-color: rgba(49, 163, 84, 0.8);
+    }
+    
+    .marker-cluster-large {
+        background-color: rgba(0, 109, 44, 0.8);
+    }
+    
+    .marker-cluster-large div {
+        background-color: rgba(0, 109, 44, 0.8);
+    }
+    
+    .mycluster {
+        width: 40px;
+        height: 40px;
+        background-color: 'greenyellow';
+        text-align: center;
+        font-size: 24px;
+    }
+    
+    .info {
+        padding: 6px 8px;
+        font: 14px/16px Arial, Helvetica, sans-serif;
+        background: white;
+        background: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        border-radius: 5px;
+    }
+    
+    .info h4 {
+        margin: 0 0 5px;
+        color: #777;
+    }
+    
+    .legend {
+        line-height: 18px;
+        color: #555;
+    }
+    
+    .legend i {
+        width: 18px;
+        height: 18px;
+        float: left;
+        margin-right: 8px;
+        opacity: 0.7;
+    }
+    </style>
+</head>
+
+<body>
+    <div>
+        <h1 align="center">Interactive Map of Video Game Makers</h1>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <div id="map">
+                </div>
+            </div>
+            <div class="col-md-4, right">
+                <div id="instructions">
+                    <h2>Instructions</h2>
+                    <p>To use the map, click on the markers. Clicking on the single blue markers will pop up a box with information about the company and the games they have developed.</p>
+                    <p>Circular markers represent clusters of companies. Clicking on the circular icons will zoom into the region of the map. Continue zooming until you see the blue markers.</p>
+                    <p>Singular blue markers without street addresses have been geocoded to a generic city center location and should not be taken as a literal address.</p>
+                </div>
+                <div id="credits">
+                    <h2>Credits</h2>
+                    <p>Video game metadata from <a href="http://www.giantbomb.com/">Giant Bomb</a>.</p>
+                    <p>Inspiration from <a href="http://www.gamedevmap.com/">gamedevmap</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./WA_game_companies.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    var map = L.map('map').setView([47.626353, -122.333144], 10);
+
+
+
+    var OpenStreetMap = L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
+        maxZoom: 16,
+        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+            'Imagery © <a href="http://mapbox.com">Mapbox</a>, ' + 
+            'Game Company Data @ <a href="http://www.giantbomb.com/">Giant Bomb</a>',
+        id: 'examples.map-20v6611k'
+    }).addTo(map);
+
+
+    function onEachFeature(feature, layer) {
+        if (feature.properties) {
+            var popupcontent;
+            popupcontent = "<p><strong>" +
+                feature.properties.name + "</strong>:<br />"
+
+            if (feature.properties.location_address) {
+                var addy = feature.properties.location_address + "<br />"
+                popupcontent = popupcontent + addy;
+
+            }
+            var city_state = feature.properties.location_city + ", " +
+                feature.properties.location_state
+            popupcontent = popupcontent + city_state;
+
+            for (i = 0; i < feature.properties.image.length; i = i + 1) {
+                var images = "<br />" + "<img src=\"" + feature.properties.image[i].thumb_url + "\">"
+                popupcontent = popupcontent + images
+            }
+
+            if (feature.properties.website) {
+                var website = "<br /><a href=\"" + feature.properties.website + "\">" +
+                    feature.properties.website + "</a>"
+                popupcontent = popupcontent + website
+            }
+
+            if (feature.properties.developed_games) {
+                popupcontent = popupcontent + "<br /><b>Developed Games:</b><ul>"
+                for (i = 0; i < feature.properties.developed_games.length; i = i + 1) {
+                    var devgames = "<li>" + "<a href=\"" + feature.properties.developed_games[i].site_detail_url + "\">" + feature.properties.developed_games[i].name + "</a></li>"
+                    popupcontent = popupcontent + devgames;
+                }
+                popupcontent = popupcontent + "</ul>"
+            }
+            layer.bindPopup(popupcontent);
+        }
+    }
+
+
+
+    var markers = new L.MarkerClusterGroup({
+        showCoverageOnHover: false,
+        spiderfyOnMaxZoom: true,
+        singleMarkerMode: false
+    });
+
+
+    var geoJsonLayer = L.geoJson(geoJsonData, {
+        onEachFeature: onEachFeature
+    });
+    markers.addLayer(geoJsonLayer);
+
+    map.addLayer(markers);
+    map.fitBounds(markers.getBounds());
+
+    var data = geoJsonData;
+
+
+    var legend = L.control({
+        position: 'bottomright'
+    });
+
+    var info = L.control();
+
+    info.onAdd = function(map) {
+        this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+        this.update();
+        return this._div;
+    };
+
+    // method that we will use to update the control based on feature properties passed
+    info.update = function(props) {
+        this._div.innerHTML = (props ?
+            '<b>' + props.name + '</b><br />' : 'Click on a Marker');
+    };
+
+    info.addTo(map);
+
+
+    function getColor(d) {
+        return d > 100 ? '#006D2C' :
+            d > 20 ? '#006D2C' :
+            d > 10 ? '#31A354' :
+            '#99D8C9';
+    }
+
+    legend.onAdd = function(map) {
+
+        var div = L.DomUtil.create('div', 'info legend'),
+            grades = [0, 10, 100],
+            labels = [];
+
+        // loop through our density intervals and generate a label with a colored square for each interval
+        for (var i = 0; i < grades.length; i++) {
+            div.innerHTML +=
+                '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+                grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+        }
+
+        return div;
+    };
+
+    legend.addTo(map);
+    L.control.scale().addTo(map);
+
+    
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+</body>
+
+</html>
